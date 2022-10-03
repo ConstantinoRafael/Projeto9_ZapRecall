@@ -1,57 +1,118 @@
 import { useState } from "react";
 import setaVirar from "./assets/img/seta_virar.png"
-import DECK from "./DECK";
 import styled from "styled-components";
 import setaPlay from "./assets/img/seta_play.png"
 
+import iconeCerto from "./assets/img/icone_certo.png";
+import iconeErro from "./assets/img/icone_erro.png";
+import iconeQuase from "./assets/img/icone_quase.png";
+
 function Pergunta(props) {
-
-    const { numero, pergunta, resposta } = props
-
-    const [estadoPergunta, setEstadoPergunta] = useState("pergunta-fechada");
-    const [mudarPergunta, setMudarPergunta] = useState([numero]);
-    const [imagemPergunta, setImagemPergunta] = useState(setaPlay);
+    const { card, ultimaPerguntaClick, setUltimaPerguntaClick, deck, setDeck } = props
     
-    if (estadoPergunta === "pergunta-fechada") {
+    const [mudarPergunta, setMudarPergunta] = useState(card.numero)
+
+    if (card.estadoPergunta === "pergunta-fechada") {
         return (
-            <PerguntaFechada>
-                <p>{mudarPergunta}</p>
-                <img src={imagemPergunta} alt={imagemPergunta} onClick={mostrarPergunta} />
+            <PerguntaFechada data-identifier="flashcard">
+                <p data-identifier="flashcard-index-item">{card.numero}</p>
+                <img data-identifier="flashcard-show-btn" src={setaPlay} alt={"setaPlay"} onClick={() => mostrarPergunta (card.id)} />
             </PerguntaFechada>
 
         )
-    } else if (estadoPergunta === "pergunta-aberta") {
+    } else if (card.estadoPergunta === "pergunta-aberta") {
         return (
             <PerguntaAberta>
-                <p>{mudarPergunta}</p>
-                <img src={imagemPergunta} alt={imagemPergunta} onClick={mostrarResposta} />
+                <p data-identifier="flashcard-question">{card.pergunta}</p>
+                <img data-identifier="flashcard-turn-btn" src={setaVirar} alt={"setaVirar"} onClick={() => mostrarResposta (card.id)} />
             </PerguntaAberta>
+        )
+    } else if (card.estadoPergunta === "resposta-aberta") {
+        return (
+            <PerguntaAberta>
+                <p data-identifier="flashcard-answer">{card.resposta}</p>
+            </PerguntaAberta>
+        )
+    } else if (card.estadoPergunta === "pergunta-verde") {
+        return (
+            <PerguntaFechadaVerde>
+                <p>{card.numero}</p>
+                <img data-identifier="flashcard-status" src={iconeCerto} alt={"icon-check"} />
+            </ PerguntaFechadaVerde>
+        )
+    } else if (card.estadoPergunta === "pergunta-amarela") {
+        return (
+            <PerguntaFechadaAmarela>
+                <p>{card.numero}</p>
+                <img data-identifier="flashcard-status" src={iconeQuase} alt={"icon-check"} />
+            </ PerguntaFechadaAmarela>
+        )
+    } else if (card.estadoPergunta === "pergunta-vermelha") {
+        return (
+            <PerguntaFechadaVermelha>
+                <p>{card.numero}</p>
+                <img data-identifier="flashcard-status" src={iconeErro} alt={"icon-check"} />
+            </ PerguntaFechadaVermelha>
         )
     }
 
 
-    function mostrarPergunta() {
-        setEstadoPergunta("pergunta-aberta");
-        setMudarPergunta(pergunta);
-        setImagemPergunta(setaVirar);
+    function mostrarPergunta(idCard) {
+
+               
+        if (ultimaPerguntaClick === null || ultimaPerguntaClick.estadoPergunta === "pergunta-verde" || ultimaPerguntaClick.estadoPergunta === "pergunta-amarela" || ultimaPerguntaClick.estadoPergunta === "pergunta-vermelha") {
+
+            console.log(idCard)
+            
+            const novoDeck = [...deck]
+
+            novoDeck[idCard].estadoPergunta = "pergunta-aberta"
+
+            setDeck(novoDeck);
+
+            setUltimaPerguntaClick(card)
+            
+        }
+
+
+        if (ultimaPerguntaClick !== null && ultimaPerguntaClick.estadoPergunta !== "pergunta-verde" && ultimaPerguntaClick.estadoPergunta !== "pergunta-amarela" && ultimaPerguntaClick.estadoPergunta !== "pergunta-vermelha") {
+
+            console.log(idCard)
+
+            const novoDeck = [...deck]
+
+            novoDeck[ultimaPerguntaClick.id].estadoPergunta = "pergunta-fechada"
+
+            novoDeck[idCard].estadoPergunta = "pergunta-aberta"
+
+            setDeck(novoDeck);
+
+            setUltimaPerguntaClick(card);
+
+        }       
+        
     }
 
-    function mostrarResposta() {
-        setMudarPergunta(resposta);
-        setImagemPergunta("");
+    function mostrarResposta(idCard) {
+
+        console.log(idCard)
+        const novoDeck = [...deck]
+
+        novoDeck[idCard].estadoPergunta = "resposta-aberta"
+
+        setDeck(novoDeck);
+
+        
     }
-
-
-
 
 }
 
 export default function Perguntas(props) {
-    const {estadoPergunta, setEstadoPergunta, mudarPergunta, setMudarPergunta, imagemPergunta, setImagemPergunta} = props
+    const { deck, setDeck,ultimaPerguntaClick, setUltimaPerguntaClick } = props
 
     return (
         <>
-            {DECK.map((p) => (<Pergunta key={p.numero} numero={p.numero} pergunta={p.pergunta} resposta={p.resposta} estadoPergunta={estadoPergunta} setEstadoPergunta={setEstadoPergunta} mudarPergunta={mudarPergunta} setMudarPergunta={setMudarPergunta} imagemPergunta={imagemPergunta} setImagemPergunta={setImagemPergunta}/>))}
+            {deck.map((perg) => (<Pergunta key={perg.numero} deck={deck} setDeck={setDeck} card={perg} ultimaPerguntaClick={ultimaPerguntaClick} setUltimaPerguntaClick={setUltimaPerguntaClick} />))}
         </>
     )
 }
@@ -119,3 +180,88 @@ const PerguntaAberta = styled.div`
     cursor: pointer;
     }
   `
+
+const PerguntaFechadaVerde = styled.div`
+    width: 300px;
+    height: 35px;
+    background-color: #FFFFFF;
+    margin: 12px;
+    padding: 15px;
+    box-shadow: 0px 4px 5px rgba(0, 0, 0, 0.15);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-decoration: line-through;
+    text-decoration-color: #2FBE34;
+
+
+    img {
+    cursor: pointer;
+    }
+
+    p {
+    font-family: 'Recursive';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 19px;
+    color: #2FBE34;
+    }
+`
+
+const PerguntaFechadaAmarela = styled.div`
+    width: 300px;
+    height: 35px;
+    background-color: #FFFFFF;
+    margin: 12px;
+    padding: 15px;
+    box-shadow: 0px 4px 5px rgba(0, 0, 0, 0.15);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-decoration: line-through;
+    text-decoration-color: #FF922E;
+
+    img {
+    cursor: pointer;
+    }
+
+    p {
+    font-family: 'Recursive';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 19px;
+    color: #FF922E;
+    }
+`
+
+const PerguntaFechadaVermelha = styled.div`
+    width: 300px;
+    height: 35px;
+    background-color: #FFFFFF;
+    margin: 12px;
+    padding: 15px;
+    box-shadow: 0px 4px 5px rgba(0, 0, 0, 0.15);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-decoration: line-through;
+    text-decoration-color: #FF3030;
+
+    img {
+    cursor: pointer;
+    }
+
+    p {
+    font-family: 'Recursive';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 19px;
+    color: #FF3030;
+    }
+`

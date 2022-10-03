@@ -2,17 +2,28 @@ import LogoContainer from "./LogoContainer";
 import styled from "styled-components";
 import Perguntas from './Perguntas';
 import FooterConcluidos from "./FooterConcluidos";
+import DECK from "./DECK";
+import { useState } from "react";
 
 export default function App() {
+
+    const [estadoPergunta, setEstadoPergunta] = useState("pergunta-fechada")
+
+
+    const [contador, setContador] = useState(0);
+    const [ultimaPerguntaClick, setUltimaPerguntaClick] = useState(null)
+
+    const [deck, setDeck] = useState(DECK);
+    
      
     return (
         <ScreenContainer>
             <LogoContainer />
 
-            <Perguntas />
+            <Perguntas deck={deck} setDeck={setDeck} ultimaPerguntaClick={ultimaPerguntaClick} setUltimaPerguntaClick={setUltimaPerguntaClick}/>
 
             <StyleFooterConcluidos>
-                <FooterConcluidos />
+                <FooterConcluidos deck={deck} setDeck={setDeck} contador={contador} setContador={setContador} ultimaPerguntaClick={ultimaPerguntaClick} setUltimaPerguntaClick={setUltimaPerguntaClick} />
             </StyleFooterConcluidos>
         </ScreenContainer>
     )
@@ -45,4 +56,4 @@ const StyleFooterConcluidos = styled.div`
     font-size: 18px;
     color: #333333;
     padding: 10px;
-`
+`;
